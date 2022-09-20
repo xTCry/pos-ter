@@ -1070,9 +1070,9 @@ export class PosEncoder {
      */
     public qrcode(
         value: string,
-        model: number,
-        size: number,
-        errorlevel: string,
+        model: 1 | 2 = 2,
+        size: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 = 6,
+        errorlevel: 'l' | 'm' | 'q' | 'h' = 'm',
     ) {
         if (this._embedded) {
             throw new Error(
@@ -1090,10 +1090,6 @@ export class PosEncoder {
             1: 0x31,
             2: 0x32,
         };
-
-        if (typeof model === 'undefined') {
-            model = 2;
-        }
 
         if (model in models) {
             this._queue([
@@ -1113,10 +1109,6 @@ export class PosEncoder {
 
         /* Size */
 
-        if (typeof size === 'undefined') {
-            size = 6;
-        }
-
         if (typeof size !== 'number') {
             throw new Error('Size must be a number');
         }
@@ -1135,10 +1127,6 @@ export class PosEncoder {
             q: 0x32,
             h: 0x33,
         };
-
-        if (typeof errorlevel === 'undefined') {
-            errorlevel = 'm';
-        }
 
         if (errorlevel in errorlevels) {
             this._queue([
