@@ -387,12 +387,20 @@ export class PosEncoder {
 
     /**
      * Initialize the printer
-     *
      */
     public initialize() {
         this._queue([0x1b, 0x40]);
 
         this._flush();
+
+        return this;
+    }
+
+    /**
+     * (Alias) Initialize the printer
+     */
+    public init() {
+        this.initialize();
 
         return this;
     }
@@ -1184,18 +1192,27 @@ export class PosEncoder {
      */
     public image(
         element: Canvas | Image,
-        width: number,
-        height: number,
+        width: number = null,
+        height: number = null,
         algorithm:
             | 'threshold'
             | 'bayer'
             | 'floydsteinberg'
-            | 'atkinson' = 'threshold',
+            | 'atkinson' = 'atkinson',
         threshold: number = 128,
         resize: boolean = true,
     ) {
         if (this._embedded) {
             throw new Error('Images are not supported in table cells or boxes');
+        }
+
+        if (width === null) {
+            width = element.width;
+            width += width % 8 === 0 ? 0 : 8 - (width % 8);
+        }
+        if (height === null) {
+            height = element.height;
+            height += height % 8 === 0 ? 0 : 8 - (height % 8);
         }
 
         if (width % 8 !== 0) {
@@ -1419,5 +1436,14 @@ export class PosEncoder {
         this._reset();
 
         return result;
+    }
+
+    /**
+     * Encode all previous commands and convert to buffer
+     *
+     * @return Return the buffer containing the encoded bytes
+     */
+    public getBuffer() {
+        return Buffer.from(this.encode());
     }
 }
