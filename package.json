@@ -21,6 +21,8 @@
         "canvas": "^2.8.0",
         "canvas-dither": "^1.0.1",
         "canvas-flatten": "^1.0.1",
+        "express": "^4.18.1",
+        "express-fileupload": "^1.4.0",
         "linewrap": "^0.2.1",
         "usb": "^2.5.1"
     },
@@ -28,6 +30,8 @@
         "canvas": "2.8.0"
     },
     "devDependencies": {
+        "@types/express": "^4.17.14",
+        "@types/express-fileupload": "^1.4.1",
         "@types/node": "^18.7.18",
         "nodemon": "^2.0.20",
         "ts-node": "^10.9.1",

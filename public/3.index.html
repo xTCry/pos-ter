@@ -1,0 +1,172 @@
+<html>
+    <head>
+        <title>POS Form</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link
+            rel="stylesheet"
+            href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        />
+    </head>
+
+    <body>
+        <div class="container" style="width: 50%">
+            <h1>Web POS</h1>
+
+            <div class="form-group">
+                <label>Server</label>
+                <input
+                    class="form-control"
+                    id="server"
+                    value="http://localhost:3002"
+                />
+            </div>
+            <hr />
+
+            <h2>Text print</h2>
+            <form id="form-text">
+                <div class="form-group">
+                    <label>Text</label>
+                    <textarea
+                        class="form-control"
+                        id="text"
+                        placeholder="Long text here"
+                    ></textarea>
+                </div>
+                <button class="btn btn-primary">Print</button>
+            </form>
+            <hr />
+
+            <h2>Canvas print</h2>
+            <form id="form-canvas">
+                <div class="form-group">
+                    <label>Text</label>
+                    <input
+                        class="form-control"
+                        id="text"
+                        maxlength="48"
+                        placeholder="Short text here"
+                    />
+                </div>
+                <button class="btn btn-primary">Print canvas</button>
+            </form>
+            <hr />
+
+            <h2>Image draw</h2>
+            <form id="form-image">
+                <div class="form-group">
+                    <label>Select file to upload</label>
+                    <input
+                        type="file"
+                        class="form-control"
+                        accept="image/*"
+                    />
+                </div>
+                <button class="btn btn-primary">Draw</button>
+            </form>
+
+            <h2>Image by link</h2>
+            <form id="form-image-link">
+                <div class="form-group">
+                    <label>Image link</label>
+                    <input
+                        class="form-control"
+                        id="link"
+                        placeholder="https://example.com/image.png"
+                    />
+                </div>
+                <button class="btn btn-primary">Draw</button>
+            </form>
+        </div>
+    </body>
+</html>
+
+<script>
+    document
+        .getElementById('form-text')
+        .addEventListener('submit', handlePrint);
+    document
+        .getElementById('form-canvas')
+        .addEventListener('submit', handleCanvas);
+    document
+        .getElementById('form-image')
+        .addEventListener('submit', handleImage);
+    document
+        .getElementById('form-image-link')
+        .addEventListener('submit', handleImageLink);
+
+    function handlePrint(e) {
+        e.preventDefault();
+
+        const server = document.getElementById('server').value;
+        const text = document.querySelector('#form-text #text').value;
+        fetch(`${server}/print`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+    function handleCanvas(e) {
+        e.preventDefault();
+
+        const server = document.getElementById('server').value;
+        const text = document.querySelector('#form-canvas #text').value;
+        fetch(`${server}/canvas`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+    function handleImage(e) {
+        e.preventDefault();
+
+        const server = document.getElementById('server').value;
+        const input = document.querySelector('#form-image input[type="file"]');
+
+        const data = new FormData();
+        data.append('file', input.files[0]);
+
+        fetch(`${server}/image`, {
+            method: 'POST',
+            body: data,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+    function handleImageLink(e) {
+        e.preventDefault();
+
+        const server = document.getElementById('server').value;
+        const link = document.querySelector('#form-image-link #link').value;
+        fetch(`${server}/image-link`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ link }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+</script>
