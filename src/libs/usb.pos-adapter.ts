@@ -141,9 +141,29 @@ export default class USBPosAdapter extends PosAdapter /* <[timeout?: number]> */
         return this;
     }
 
+    public openAsync() {
+        return new Promise((resolve, reject) => {
+            this.open((err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(1);
+                }
+            });
+        });
+    }
+
     public read(callback?: (data: Buffer) => void): void {
         this.deviceToPcEndpoint.transfer(64, (error: any, data: Buffer) => {
             callback && callback(data);
+        });
+    }
+
+    public readAsync() {
+        return new Promise((resolve) => {
+            this.read((data) => {
+                resolve(data);
+            });
         });
     }
 
@@ -156,16 +176,42 @@ export default class USBPosAdapter extends PosAdapter /* <[timeout?: number]> */
         return this;
     }
 
-    public close(callback?: (error: Error | null) => void): this {
-        if (!this.device) callback && callback(null);
+    public writeAsync(data: string | Buffer) {
+        return new Promise((resolve, reject) => {
+            this.write(data, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(1);
+                }
+            });
+        });
+    }
+
+    public close(callback: (error: Error | null) => void = () => {}): this {
+        if (!this.device) {
+            callback(null);
+        }
         try {
             this.device.close();
             USB.usb.removeAllListeners('detach');
-            callback && callback(null);
+            callback(null);
             this.emit('close', this.device);
         } catch (err: any) {
-            callback && callback(err);
+            callback(err);
         }
         return this;
+    }
+
+    public closeAsync() {
+        return new Promise((resolve, reject) => {
+            this.close((err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(1);
+                }
+            });
+        });
     }
 }
