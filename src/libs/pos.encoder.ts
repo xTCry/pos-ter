@@ -8,11 +8,11 @@ import {
     CodepageEncoder as cpEncoder,
 } from './codepage.encoder';
 
-export type KeysDefinitions2 = KeysDefinitions & 'shiftjis';
+export type KeysDefinitions2 = KeysDefinitions | 'shiftjis';
 
 const codepageMappings: Record<
     string,
-    Record<Partial<KeysDefinitions2>, number>
+    Record<Partial<KeysDefinitions2 | string>, number>
 > = {
     epson: {
         cp437: 0x00,
@@ -165,7 +165,7 @@ export type OptionsType = {
     embedded?: boolean;
     wordWrap?: boolean;
     imageMode?: 'column' | 'raster';
-    codepageMapping?: KeysDefinitions2 | Record<KeysDefinitions2, number>;
+    codepageMapping?: KeysDefinitions2 | keyof typeof codepageMappings;
     codepageCandidates?: Partial<KeysDefinitions2>[];
     codepage?: KeysDefinitions2 | 'auto';
 };
@@ -262,7 +262,7 @@ export class PosEncoder {
 
         const fragments = cpEncoder.autoEncode(
             value,
-            this._options.codepageCandidates,
+            this._options.codepageCandidates as Partial<KeysDefinitions>[],
         );
 
         let length = 0;
