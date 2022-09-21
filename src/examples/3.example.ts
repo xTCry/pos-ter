@@ -143,6 +143,17 @@ const drawImage = async (image: Image) => {
     await device.writeAsync(buffer);
 };
 
+device.on('detach', async () => {
+    console.log('Device detached');
+    console.log('Wait 5 seconds to reconnect...');
+    await new Promise((resolve) => setTimeout(resolve, 5e3));
+    device.setDevice();
+});
+
+device.on('found', (device) => {
+    console.log('Device found');
+});
+
 // * Cleanup
 
 setCleanup(async (code) => {

@@ -21,20 +21,24 @@ export default class USBPosAdapter extends PosAdapter /* <[timeout?: number]> */
 
     constructor(device: Device);
     constructor(vid?: number, pid?: number);
-    constructor(vidOrDevice?: number | Device, pid?: number) {
+    constructor(
+        private readonly vidOrDevice?: number | Device,
+        private readonly pid?: number,
+    ) {
         super();
 
+        this.setDevice(this.vidOrDevice, this.pid);
+    }
+
+    public setDevice(
+        vidOrDevice: number | Device = this.vidOrDevice,
+        pid: number = this.pid,
+    ) {
         if (typeof vidOrDevice === 'number') {
             if (pid) {
                 this.device = USB.findByIds(vidOrDevice, pid);
             }
         } else if (vidOrDevice) {
-            // Set spesific USB device from devices array as coming from USB.findPrinter() function.
-            // for example
-            // let devices = escpos.USB.findPrinter();
-            // => devices [ Device1, Device2 ];
-            // And Then
-            // const device = new escpos.USB(Device1); OR device = new escpos.USB(Device2);
             this.device = vidOrDevice;
         } else {
             const devices = USBPosAdapter.findPrinter();
@@ -47,6 +51,8 @@ export default class USBPosAdapter extends PosAdapter /* <[timeout?: number]> */
             throw new Error('Can not find printer');
         }
 
+        this.emit('found', this.device);
+
         USB.usb.on('detach', (device) => {
             if (device === this.device) {
                 this.emit('detach', device);
@@ -54,6 +60,8 @@ export default class USBPosAdapter extends PosAdapter /* <[timeout?: number]> */
                 this.device = null;
             }
         });
+
+        return this;
     }
 
     public static findPrinter() {
@@ -176,11 +184,26 @@ export default class USBPosAdapter extends PosAdapter /* <[timeout?: number]> */
         return this;
     }
 
-    public writeAsync(data: string | Buffer) {
+    public writeAsync(data: string | Buffer, reopen = true) {
         return new Promise((resolve, reject) => {
             this.write(data, (err) => {
                 if (err) {
-                    reject(err);
+                    if (
+                        !err.message.includes('LIBUSB_ERROR_NOT_FOUND') &&
+                        reopen
+                    ) {
+                        this.open((err) => {
+                            if (err) {
+                                reject(err);
+                            } else {
+                                this.writeAsync(data, false)
+                                    .then(resolve)
+                                    .catch(reject);
+                            }
+                        });
+                    } else {
+                        reject(err);
+                    }
                 } else {
                     resolve(1);
                 }
